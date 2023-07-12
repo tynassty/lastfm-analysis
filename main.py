@@ -125,4 +125,4 @@ import networkx as nx
 #
 # plt.show()
 
-graph_functions.line_graph('scrobbles-tynassty-1688968485.csv')
+graph_functions.line_graph('scrobbles-tynassty.csv', count=10)
