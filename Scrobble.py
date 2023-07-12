@@ -10,4 +10,21 @@ class Scrobble:
         self.track = track
         self.track_mbid = track_mbid
 
+    def __lt__(self, other):
+        return self.uts < other.uts
+
+    def __le__(self, other):
+        return self.uts <= other.uts
+
+    def __eq__(self, other):
+        return self.uts == other.uts
+
+    def __ne__(self, other):
+        return self.uts != other.uts
+
+    def __gt__(self, other):
+        return self.uts > other.uts
+
+    def __ge__(self, other):
+        return self.uts >= other.uts
 

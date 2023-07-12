@@ -1,7 +1,7 @@
 from collections import Counter
 from lastfm_reader import *
-import networkx as nx
 import matplotlib.pyplot as plt
+import networkx as nx
 
 # G = nx.petersen_graph()
 # subax1 = plt.subplot(121)
@@ -40,7 +40,39 @@ import matplotlib.pyplot as plt
 
 scrobbles = read_scrobbles('scrobbles-tynassty-1688968485.csv')
 counts = Counter()
+
 for scrobble in scrobbles:
-    if scrobble.uts >= 0:
-        counts[scrobble.artist] += 1
-print(counts.most_common(10))
+    counts[scrobble.artist] += 1
+
+top_n_artists_cts = counts.most_common(5)
+unique_artists = [artist_ct[0] for artist_ct in top_n_artists_cts]
+# unique_artists = set(counts)
+artist_dictionary = {}
+
+for artist in unique_artists:
+    mention_count = []
+    current_count = 0
+    for scrobble in scrobbles:
+        if artist == scrobble.artist:
+            count = 1
+        else:
+            count = 0
+        current_count += count
+        mention_count.append(current_count)
+    artist_dictionary[artist] = mention_count
+
+x_axis = []
+for scrobble in scrobbles:
+    x_axis.append(scrobble.uts)
+
+x = x_axis
+plt.figure(figsize=(12, 12))
+for artist in artist_dictionary:
+    plt.plot(x, artist_dictionary[artist], label=artist)
+plt.title('Scrobbles of top artists over time')
+plt.legend()
+plt.show()
+
+# print(counts.most_common(10))
+
+
