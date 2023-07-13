@@ -2,6 +2,8 @@ from collections import Counter
 from lastfm_reader import *
 import matplotlib.pyplot as plt
 import networkx as nx
+from matplotlib.cm import get_cmap
+import numpy as np
 
 
 def count_occurrences(scrobbles, attribute='artist'):
@@ -15,11 +17,11 @@ def count_occurrences(scrobbles, attribute='artist'):
     return counts, occurrence_list
 
 
-def line_graph(file, count=10, attribute='artist'):
+def line_graph(file, k=10, attribute='artist'):
     scrobbles = read_scrobbles(file)
     counts, occurrence_list = count_occurrences(scrobbles, attribute=attribute)
 
-    top_n_counts = counts.most_common(count)
+    top_n_counts = counts.most_common(k)
     unique_occurrences = [artist_ct[0] for artist_ct in top_n_counts]
 
     occurrence_dictionary = {}
@@ -39,38 +41,39 @@ def line_graph(file, count=10, attribute='artist'):
 
     x = x_axis
     plt.figure(figsize=(10, 6))
-    for item in occurrence_dictionary:
+    for i, item in enumerate(occurrence_dictionary):
         plt.plot(x, occurrence_dictionary[item], label=item)
-    plt.title('Scrobbles of top artists over time')
+        i += 1
+    plt.title('Scrobbles of top ' + str(k) + ' ' + attribute + 's over time')
     plt.legend()
     plt.show()
 
 
-def interaction_graph(file):
+def interaction_graph(file, k=10):
     scrobbles = read_scrobbles(file)
 
-    counts, artist_list = count_occurrences(scrobbles)
+    counts, occurrence_list = count_occurrences(scrobbles)
 
-    top_n_artists_cts = counts.most_common(10)
-    top_artists = [artist_ct[0] for artist_ct in top_n_artists_cts]
+    top_n_cts = counts.most_common(k)
+    unique_occurrences = [artist_ct[0] for artist_ct in top_n_cts]
 
-    artist_tuples = {}
+    occurrence_tuples = {}
     prior = 'START'
 
-    for artist in artist_list:
-        tup = (prior, artist)
-        if tup in artist_tuples:
-            artist_tuples[tup] += 1
+    for item in occurrence_list:
+        tup = (prior, item)
+        if tup in occurrence_tuples:
+            occurrence_tuples[tup] += 1
         else:
-            artist_tuples[tup] = 1
-        prior = artist
+            occurrence_tuples[tup] = 1
+        prior = item
 
     G = nx.DiGraph()
     edge_thick = []
     vsum = 0
 
-    for key, value in artist_tuples.items():
-        if key[0] in top_artists and key[1] in top_artists and key[0] != key[1]:
+    for key, value in occurrence_tuples.items():
+        if key[0] in unique_occurrences and key[1] in unique_occurrences and key[0] != key[1]:
             name1, name2 = key
             G.add_edge(name1, name2, weight=value)
             edge_thick.append(value)
@@ -80,7 +83,7 @@ def interaction_graph(file):
 
     pos = nx.spring_layout(G, k=2)
     node_colors = range(len(G))
-    M = G.number_of_edges()
+    # M = G.number_of_edges()
 
     plt.figure(figsize=(10, 6), facecolor=None)
     nodes = nx.draw_networkx_nodes(G, pos, node_size=1500, node_color=node_colors, cmap=plt.cm.Reds)
