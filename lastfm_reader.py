@@ -7,7 +7,8 @@ def read_scrobbles(scrobbles_file):
     next(f)
     for line in f:
         line = line.split('",')
-        scrobbles.append(Scrobble(int(line[0][1:]), line[1][1:], line[2][1:], line[3][1:], line[4][1:], line[5][1:], line[6][1:], line[7][1:-1]))
+        scrobbles.append(Scrobble(int(line[0][1:]), line[1][1:], line[2][1:], line[3][1:],
+                                  line[4][1:], line[5][1:], line[6][1:], line[7][1:-1]))
     scrobbles = sorted(scrobbles)
     return scrobbles
 
