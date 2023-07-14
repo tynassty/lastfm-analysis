@@ -2,12 +2,17 @@ from collections import Counter
 from lastfm_reader import *
 import matplotlib.pyplot as plt
 import networkx as nx
-from matplotlib.cm import get_cmap
-import numpy as np
 from typing import List
 
 
-def count_occurrences(scrobbles, attribute='artist'):
+def count_occurrences(scrobbles: List[Scrobble], attribute='artist'):
+    """
+    Counts occurrences of a given attribute in a list of scrobbles.
+    :param scrobbles: A list of scrobbles
+    :param attribute: The attribute to count. Default is 'artist', other possibilities include 'album' and 'track'.
+    :return: counts, a Counter object containing the counts of each attribute value, and occurrence_list, a list of the
+    attributes in the order they appear
+    """
     counts = Counter()
     occurrence_list = []
 
@@ -19,7 +24,15 @@ def count_occurrences(scrobbles, attribute='artist'):
 
 
 def line_graph(file, k=10, attribute='artist'):
+    """
+    Generate a line graph that shows the scrobbles of the top k of an attribute over time.
+    :param file: The address of the file containing scrobble data.
+    :param k: The number of artists to graph.
+    :param attribute: The attribute to graph. Default is 'artist', other possibilities include 'album' and 'track'.
+    :return: None
+    """
     scrobbles = read_scrobbles(file)
+    scrobbles = sorted(scrobbles)
     counts, occurrence_list = count_occurrences(scrobbles, attribute=attribute)
 
     top_n_counts = counts.most_common(k)
@@ -36,20 +49,11 @@ def line_graph(file, k=10, attribute='artist'):
             mention_count.append(current_count)
         occurrence_dictionary[item] = mention_count
 
-    # colormap = get_cmap('tab20')
-    # num_colors = len(unique_occurrences)
-    # colors = colormap(range(num_colors))
+    x_axis = [scrobble.datetime for scrobble in scrobbles]
 
-    # colors = plt.cm.Set3(np.linspace(0, 1, k))
-
-    x_axis = []
-    for scrobble in scrobbles:
-        x_axis.append(scrobble.datetime)
-
-    x = x_axis
     plt.figure(figsize=(10, 6))
     for i, item in enumerate(occurrence_dictionary):
-        plt.plot(x, occurrence_dictionary[item], label=item)
+        plt.plot(x_axis, occurrence_dictionary[item], label=item)
         i += 1
     plt.title('Scrobbles of top ' + str(k) + ' ' + attribute + 's over time')
     plt.legend()
@@ -57,8 +61,15 @@ def line_graph(file, k=10, attribute='artist'):
 
 
 def line_graph_by_names(file, names: List[str], attribute='artist'):
+    """
+        Generate a line graph that shows the scrobbles of the top k of an attribute over time.
+        :param file: The address of the file containing scrobble data.
+        :param names: A list of names to graph.
+        :param attribute: The attribute to graph. Default is 'artist', other possibilities include 'album' and 'track'.
+        :return: None
+        """
     scrobbles = read_scrobbles(file)
-    counts, occurrence_list = count_occurrences(scrobbles, attribute=attribute)
+    scrobbles = sorted(scrobbles)
 
     occurrence_dictionary = {}
 
@@ -71,20 +82,11 @@ def line_graph_by_names(file, names: List[str], attribute='artist'):
             mention_count.append(current_count)
         occurrence_dictionary[item] = mention_count
 
-    # colormap = get_cmap('tab20')
-    # num_colors = len(unique_occurrences)
-    # colors = colormap(range(num_colors))
+    x_axis = [scrobble.datetime for scrobble in scrobbles]
 
-    # colors = plt.cm.Set3(np.linspace(0, 1, k))
-
-    x_axis = []
-    for scrobble in scrobbles:
-        x_axis.append(scrobble.datetime)
-
-    x = x_axis
     plt.figure(figsize=(10, 6))
     for i, item in enumerate(occurrence_dictionary):
-        plt.plot(x, occurrence_dictionary[item], label=item)
+        plt.plot(x_axis, occurrence_dictionary[item], label=item)
         i += 1
     plt.title('Scrobbles of selected ' + attribute + 's over time')
     plt.legend()
