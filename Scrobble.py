@@ -42,17 +42,18 @@ class Scrobble:
         self.year = self.datetime.year
         self.month = int_to_month(self.datetime.month)
         self.day_of_week = int_to_weekday(self.datetime.weekday())
+        self.hour = self.datetime.hour
         self.artist = artist
         self.artist_mbid = artist_mbid
-        self.album_solo = album
+        self.__album = album
         self.album = album + " (" + artist + ")"
         self.album_mbid = album_mbid
-        self.track_solo = track
+        self.__track = track
         self.track = track + " (" + artist + ")"
         self.track_mbid = track_mbid
 
     def __str__(self):
-        return f"Datetime: {self.datetime}, Artist: {self.artist}, Track: {self.track_solo}, Album: {self.album_solo}"
+        return f"Datetime: {self.datetime}, Artist: {self.artist}, Track: {self.__track}, Album: {self.__album}"
 
     def __lt__(self, other):
         return self.uts < other.uts

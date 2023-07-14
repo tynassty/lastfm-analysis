@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.cm import get_cmap
 import numpy as np
+from typing import List
 
 
 def count_occurrences(scrobbles, attribute='artist'):
@@ -35,9 +36,15 @@ def line_graph(file, k=10, attribute='artist'):
             mention_count.append(current_count)
         occurrence_dictionary[item] = mention_count
 
+    # colormap = get_cmap('tab20')
+    # num_colors = len(unique_occurrences)
+    # colors = colormap(range(num_colors))
+
+    # colors = plt.cm.Set3(np.linspace(0, 1, k))
+
     x_axis = []
     for scrobble in scrobbles:
-        x_axis.append(scrobble.uts)
+        x_axis.append(scrobble.datetime)
 
     x = x_axis
     plt.figure(figsize=(10, 6))
@@ -45,6 +52,41 @@ def line_graph(file, k=10, attribute='artist'):
         plt.plot(x, occurrence_dictionary[item], label=item)
         i += 1
     plt.title('Scrobbles of top ' + str(k) + ' ' + attribute + 's over time')
+    plt.legend()
+    plt.show()
+
+
+def line_graph_by_names(file, names: List[str], attribute='artist'):
+    scrobbles = read_scrobbles(file)
+    counts, occurrence_list = count_occurrences(scrobbles, attribute=attribute)
+
+    occurrence_dictionary = {}
+
+    for item in names:
+        mention_count = []
+        current_count = 0
+        for scrobble in scrobbles:
+            count = 1 if item == getattr(scrobble, attribute) else 0
+            current_count += count
+            mention_count.append(current_count)
+        occurrence_dictionary[item] = mention_count
+
+    # colormap = get_cmap('tab20')
+    # num_colors = len(unique_occurrences)
+    # colors = colormap(range(num_colors))
+
+    # colors = plt.cm.Set3(np.linspace(0, 1, k))
+
+    x_axis = []
+    for scrobble in scrobbles:
+        x_axis.append(scrobble.datetime)
+
+    x = x_axis
+    plt.figure(figsize=(10, 6))
+    for i, item in enumerate(occurrence_dictionary):
+        plt.plot(x, occurrence_dictionary[item], label=item)
+        i += 1
+    plt.title('Scrobbles of selected ' + attribute + 's over time')
     plt.legend()
     plt.show()
 
@@ -83,7 +125,7 @@ def interaction_graph(file, k=10):
 
     pos = nx.spring_layout(G, k=2)
     node_colors = range(len(G))
-    # M = G.number_of_edges()
+    M = G.number_of_edges()
 
     plt.figure(figsize=(10, 6), facecolor=None)
     nodes = nx.draw_networkx_nodes(G, pos, node_size=1500, node_color=node_colors, cmap=plt.cm.Reds)
