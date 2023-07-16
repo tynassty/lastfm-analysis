@@ -1,4 +1,5 @@
 from collections import Counter
+from Scrobble import *
 from lastfm_reader import *
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -23,15 +24,14 @@ def count_occurrences(scrobbles: List[Scrobble], attribute='artist'):
     return counts, occurrence_list
 
 
-def line_graph(file, k=10, attribute='artist'):
+def line_graph(scrobbles: List[Scrobble], k=10, attribute='artist'):
     """
     Generate a line graph that shows the scrobbles of the top k of an attribute over time.
-    :param file: The address of the file containing scrobble data.
+    :param scrobbles: A list of scrobbles
     :param k: The number of artists to graph.
     :param attribute: The attribute to graph. Default is 'artist', other possibilities include 'album' and 'track'.
     :return: None
     """
-    scrobbles = read_scrobbles(file)
     scrobbles = sorted(scrobbles)
     counts, occurrence_list = count_occurrences(scrobbles, attribute=attribute)
 
@@ -60,15 +60,14 @@ def line_graph(file, k=10, attribute='artist'):
     plt.show()
 
 
-def line_graph_by_names(file, names: List[str], attribute='artist'):
+def line_graph_by_names(scrobbles: List[Scrobble], names: List[str], attribute='artist'):
     """
         Generate a line graph that shows the scrobbles of the top k of an attribute over time.
-        :param file: The address of the file containing scrobble data.
+        :param scrobbles: A list of scrobbles
         :param names: A list of names to graph.
         :param attribute: The attribute to graph. Default is 'artist', other possibilities include 'album' and 'track'.
         :return: None
         """
-    scrobbles = read_scrobbles(file)
     scrobbles = sorted(scrobbles)
 
     occurrence_dictionary = {}

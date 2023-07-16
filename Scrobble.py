@@ -1,7 +1,13 @@
 from datetime import datetime as dt
+from typing import List
 
 
 def int_to_weekday(n):
+    """
+    helper function. converts integers to weekday strings
+    :param n: int representing a weekday, 0 = Monday to 6 = Sunday
+    :return: a string representing that weekday
+    """
     weekdays = {
         0: 'Monday',
         1: 'Tuesday',
@@ -15,6 +21,11 @@ def int_to_weekday(n):
 
 
 def int_to_month(n):
+    """
+    helper function. converts integers to month strings
+    :param n: int representing a month, 1 = January to 12 = December
+    :return: a string representing that month
+    """
     months = {
         1: 'January',
         2: 'February',
@@ -39,7 +50,7 @@ class Scrobble:
         self.uts = uts
         self.utc_time = utc_time
         self.datetime = dt.fromtimestamp(uts)
-        self.year = self.datetime.year
+        self.year = str(self.datetime.year)
         self.month = int_to_month(self.datetime.month)
         self.day_of_week = int_to_weekday(self.datetime.weekday())
         self.hour = self.datetime.hour
@@ -73,3 +84,6 @@ class Scrobble:
     def __ge__(self, other):
         return self.uts >= other.uts
 
+
+def filter_by_key(scrobbles: List[Scrobble], filter_key: str, attribute='artist'):
+    return [scrobble for scrobble in scrobbles if getattr(scrobble, attribute) == filter_key]
