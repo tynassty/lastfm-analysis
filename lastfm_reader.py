@@ -13,4 +13,5 @@ def read_scrobbles(scrobbles_file):
 
 
 if __name__ == '__main__':
-    read_scrobbles("scrobbles-tynassty.csv")
+    scrobbles = read_scrobbles("scrobbles-tynassty.csv")
+    print(len(scrobbles))
