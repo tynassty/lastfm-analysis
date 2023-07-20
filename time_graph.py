@@ -8,7 +8,7 @@ from lastfm_reader import read_scrobbles
 
 
 def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobble], artists: List[str], bin_count=100,
-                   graph_type="simple", plot_func=plt.plot):
+                   graph_type="simple", plot_func=plt.plot, mvg_avg_period=1):
     bins = create_bins(start, end, bin_count=bin_count)
     array = [{artist: 0 for artist in artists} for _ in range(bin_count)]
     bin_index = 0
@@ -27,8 +27,10 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
         y_axis = [array[i][artist] for i in range(len(bins))]
         if graph_type == "cumulative":
             y_axis = accumulate_array(y_axis)
+        y_axis = moving_sum(y_axis, mvg_avg_period)
         plot_func(x_axis, y_axis, label=artist)
-    plt.title('Scrobbles of top artists over time')
+    bin_length_datetime = bins[mvg_avg_period] - bins[0]
+    plt.title('Moving sum of scrobbles of top artists over time, period=' + str(bin_length_datetime.days))
     plt.legend()
     plt.show()
 
@@ -54,17 +56,30 @@ def accumulate_array(array: List[int]):
     return cumulative
 
 
-def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_count=100, graph_type="simple", plot_func=plt.plot):
+def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_count=100, graph_type="simple", plot_func=plt.plot,
+                         mvg_avg_period=1):
     scrobbles = sorted(scrobbles)
     counts, _ = graph_functions.count_occurrences(scrobbles)
     artists = [artist_ct[0] for artist_ct in counts.most_common(k)]
     generate_graph(min(scrobbles).datetime, max(scrobbles).datetime, scrobbles, artists, bin_count=bin_count,
-                   graph_type=graph_type, plot_func=plot_func)
+                   graph_type=graph_type, plot_func=plot_func, mvg_avg_period=mvg_avg_period)
+
+
+def moving_sum(array: List[int], period: int = 3):
+    moving = []
+    for i in range(len(array)):
+        start = max(0, i - period + 1)
+        moving.append(sum(array[start:i+1]))
+    return moving
 
 
 if __name__ == '__main__':
+    # array_simple = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    # array_avged = moving_average(array_simple, 1)
+
     scrobbles = read_scrobbles('scrobbles-tynassty.csv')
-    graph_from_scrobbles(scrobbles, graph_type="cumulative", bin_count=1000, plot_func=plt.step)
+    days = (max(scrobbles).datetime - min(scrobbles).datetime).days
+    graph_from_scrobbles(scrobbles, graph_type="simple", bin_count=days, plot_func=plt.step, mvg_avg_period=30, k=10)
 
     # scrobbles = sorted(scrobbles)
     # s = dt.datetime.fromtimestamp(1503869636)
