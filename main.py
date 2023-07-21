@@ -1,5 +1,5 @@
 from collections import Counter
-from datetime import datetime
+import datetime as dt
 import graph_functions
 import time_graph
 from Scrobble import filter_by_key
@@ -9,7 +9,7 @@ import networkx as nx
 import time
 
 scrobbles = read_scrobbles('scrobbles-tynassty.csv')
-# time_graph.graph(scrobbles[0].datetime)
+time_graph.graph_from_scrobbles(scrobbles, plot_func=plt.step, mvg_avg_period=dt.timedelta(days=365), k=10)
 
 # graph_functions.line_graph(scrobbles, attribute='month', k=12)
 
@@ -36,3 +36,5 @@ scrobbles = read_scrobbles('scrobbles-tynassty.csv')
 #
 # counts, occurrence_list = graph_functions.count_occurrences(scrobbles, attribute='year')
 # print(counts)
+
+# print(dt.timedelta(days=2, hours=13) / dt.timedelta(days=1))
