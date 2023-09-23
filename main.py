@@ -9,9 +9,11 @@ import networkx as nx
 import time
 
 scrobbles = read_scrobbles('scrobbles-tynassty.csv')
-time_graph.graph_from_scrobbles(scrobbles, plot_func=plt.step, mvg_avg_period=dt.timedelta(days=365), k=10)
+artists = ["halsey", "misterwives", "ladyhawke", "phantogram", "lorde", "banks", "tove lo", "chvrches", "billie eilish", "palehound"]
+# print(artists)
+time_graph.graph_from_scrobbles(scrobbles, plot_func=plt.step, mvg_avg_period=dt.timedelta(days=365), k=0, addtl_artists=artists)
 
-# graph_functions.line_graph(scrobbles, attribute='month', k=12)
+# graph_functions.line_graph(scrobbles, attribute='artist', k=10)
 
 # graph_functions.interaction_graph('scrobbles-tynassty.csv', k=25)
 # names = ["Sleater-Kinney, Courtney Barnett", "Sleater-Kinney", "Courtney Barnett"]

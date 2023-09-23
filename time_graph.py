@@ -2,6 +2,7 @@ import datetime as dt
 from typing import List
 from matplotlib import pyplot as plt
 import graph_functions
+import lastfm_reader
 from Scrobble import Scrobble
 from lastfm_reader import read_scrobbles
 
@@ -40,6 +41,7 @@ def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_width=dt.timedelta
                          plot_func=plt.plot, mvg_avg_period: dt.timedelta = dt.timedelta(days=365), addtl_artists=None):
     if addtl_artists is None:
         addtl_artists = []
+    addtl_artists = [lastfm_reader.clean_text(artist) for artist in addtl_artists]
     scrobbles = sorted(scrobbles)
     counts, _ = graph_functions.count_occurrences(scrobbles)
     artists = [artist_ct[0] for artist_ct in counts.most_common(k)]

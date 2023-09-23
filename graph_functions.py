@@ -126,7 +126,6 @@ def interaction_graph(file, k=10):
 
     pos = nx.spring_layout(G, k=2)
     node_colors = range(len(G))
-    M = G.number_of_edges()
 
     plt.figure(figsize=(10, 6), facecolor=None)
     nodes = nx.draw_networkx_nodes(G, pos, node_size=1500, node_color=node_colors, cmap=plt.cm.Reds)
