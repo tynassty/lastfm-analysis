@@ -11,11 +11,12 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
                    bin_width: dt.timedelta, mvg_avg_period: dt.timedelta = dt.timedelta(days=365),
                    graph_type="simple", plot_func=plt.plot):
     bins = create_bins(start, end, bin_width)
+    # print(start, "to", end)
     array = [{artist: 0 for artist in artists} for _ in range(len(bins))]
     bin_index = 0
 
     for scrobble in scrobbles:
-        if scrobble.datetime > bins[bin_index]:
+        while scrobble.datetime > bins[bin_index]:
             bin_index += 1
         try:
             array[bin_index][scrobble.artist] += 1
@@ -38,7 +39,7 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
 
 
 def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_width=dt.timedelta(days=1), graph_type="simple",
-                         plot_func=plt.plot, mvg_avg_period: dt.timedelta = dt.timedelta(days=365), addtl_artists=None):
+                         plot_func=plt.step, mvg_avg_period: dt.timedelta = dt.timedelta(days=365), addtl_artists=None):
     if addtl_artists is None:
         addtl_artists = []
     addtl_artists = [lastfm_reader.clean_text(artist) for artist in addtl_artists]

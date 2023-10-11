@@ -2,6 +2,12 @@ from unidecode import unidecode
 from Scrobble import Scrobble
 
 
+COMMA_ARTISTS = ["tyler, the creator", "now, now", "love, ecstasy and terror", "thank you, i'm sorry", "merci, mercy",
+                 "slaughter beach, dog", "sincerely, me", "chunk! no, captain chunk!", "10,000 maniacs",
+                 "earth, wind & fire", "crosby, stills, nash & young", "fuck yeah, dinosaurs!",
+                 "black country, new road", "whatever, dad"]
+
+
 def clean_text(text):
     return unidecode(text.lower())
 
@@ -12,8 +18,13 @@ def read_scrobbles(scrobbles_file):
     next(f)
     for line in f:
         line = line.split('",')
-        scrobbles.append(Scrobble(int(line[0][1:]), line[1][1:], clean_text(line[2][1:]), line[3][1:],
-                                  line[4][1:], line[5][1:], line[6][1:], line[7][1:-1]))
+        artist = clean_text(line[2][1:])
+        album = clean_text(line[4][1:])
+        track = clean_text(line[6][1:])
+        if artist not in COMMA_ARTISTS:
+            artist = artist.split(",")[0]
+        scrobbles.append(Scrobble(int(line[0][1:]), line[1][1:], artist, line[3][1:], album, line[5][1:], track,
+                                  line[7][1:-1]))
     return scrobbles
 
 
