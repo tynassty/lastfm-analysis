@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import time
 
+
 def top_chart_maker(scrobbles, k=10, attribute='artist', fancy=False):
     counts, occurrence_list = graph_functions.count_occurrences(scrobbles, attribute=attribute)
     to_return = ""
@@ -42,17 +43,8 @@ if __name__ == "__main__":
     scrobbles = read_scrobbles('scrobbles-tynassty.csv')
     scrobbles = sorted(scrobbles)
 
-    # filtered_scrobbles = [scr for scr in scrobbles if scr.datetime.year == 2023]
-    # filtered_scrobbles = [scr for scr in scrobbles if scr.datetime.hour == 15]
+    scrobbles = [scr for scr in scrobbles if scr.datetime.month == 10]
+    scrobbles = [scr for scr in scrobbles if scr.datetime.year == 2023]
 
-    filtered_scrobbles_1 = []
-    filtered_scrobbles_2 = []
-    count = len(scrobbles)
-    for i in range(2, count):
-        if scrobbles[i].track[0] == "a":
-            filtered_scrobbles_1.append(scrobbles[i])
-        else:
-            filtered_scrobbles_2.append(scrobbles[i])
-
-    time_graph.graph_from_scrobbles(filtered_scrobbles_1, plot_func=plt.step, mvg_avg_period=dt.timedelta(days=10000))
-    time_graph.graph_from_scrobbles(filtered_scrobbles_2, plot_func=plt.step, mvg_avg_period=dt.timedelta(days=10000))
+    top_chart = top_chart_maker(scrobbles, 20, attribute="artist", fancy=False)
+    print(top_chart)

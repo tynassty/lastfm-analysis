@@ -7,11 +7,14 @@ from Scrobble import Scrobble
 from lastfm_reader import read_scrobbles
 
 
+class ScrobblesError(Exception):
+    pass
+
+
 def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobble], artists: List[str],
                    bin_width: dt.timedelta, mvg_avg_period: dt.timedelta = dt.timedelta(days=365),
-                   graph_type="simple", plot_func=plt.plot):
+                   graph_type="simple", plot_func=plt.plot, relative=False):
     bins = create_bins(start, end, bin_width)
-    # print(start, "to", end)
     array = [{artist: 0 for artist in artists} for _ in range(len(bins))]
     bin_index = 0
 
@@ -25,21 +28,43 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
         except IndexError:
             pass
 
-    x_axis = bins
+    if not relative:
+        x_axis = bins
+    else:
+        x_axis = []
+        counter = 0
+        for i in bins:
+            x_axis.append(counter)
+            counter += 1
     plt.figure(figsize=(10, 5))
     for artist in artists:
         y_axis = [array[i][artist] for i in range(len(bins))]
         if graph_type == "cumulative":
             y_axis = accumulate_array(y_axis)
         y_axis = moving_sum(y_axis, int(mvg_avg_period/bin_width))
-        plot_func(x_axis, y_axis, label=artist)
-    plt.title('Moving sum of scrobbles of top artists over time')
+        if relative:
+            y_axis2 = []
+            found_non_zero = False
+            for num in y_axis:
+                if num > 0:
+                    found_non_zero = True
+                if found_non_zero:
+                    y_axis2.append(num)
+            y_axis = y_axis2
+        plot_func(x_axis[:len(y_axis)], y_axis, label=artist)
+    if relative:
+        plt.title('Cumulative sum of scrobbles relative to first listen')
+    else:
+        plt.title('Moving sum of scrobbles of top artists over time')
     plt.legend()
     plt.show()
 
 
 def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_width=dt.timedelta(days=1), graph_type="simple",
-                         plot_func=plt.step, mvg_avg_period: dt.timedelta = dt.timedelta(days=365), addtl_artists=None):
+                         plot_func=plt.step, mvg_avg_period: dt.timedelta = dt.timedelta(days=365), addtl_artists=None,
+                         relative=False):
+    if len(scrobbles) <= 0:
+        raise ScrobblesError("No scrobbles passed to graph_from_scrobbles")
     if addtl_artists is None:
         addtl_artists = []
     addtl_artists = [lastfm_reader.clean_text(artist) for artist in addtl_artists]
@@ -48,7 +73,7 @@ def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_width=dt.timedelta
     artists = [artist_ct[0] for artist_ct in counts.most_common(k)]
     artists.extend(addtl_artists)
     generate_graph(min(scrobbles).datetime, max(scrobbles).datetime, scrobbles, artists, bin_width=bin_width,
-                   graph_type=graph_type, plot_func=plot_func, mvg_avg_period=mvg_avg_period)
+                   graph_type=graph_type, plot_func=plot_func, mvg_avg_period=mvg_avg_period, relative=relative)
 
 
 def create_bins(start: dt.datetime, end: dt.datetime, bin_width=dt.timedelta(days=1)):
