@@ -43,8 +43,7 @@ if __name__ == "__main__":
     scrobbles = read_scrobbles('scrobbles-tynassty.csv')
     scrobbles = sorted(scrobbles)
 
-    scrobbles = [scr for scr in scrobbles if scr.datetime.month == 10]
-    scrobbles = [scr for scr in scrobbles if scr.datetime.year == 2023]
+    scrobbles = [scr for scr in scrobbles if scr.datetime.hour == 23]
 
     top_chart = top_chart_maker(scrobbles, 20, attribute="artist", fancy=False)
     print(top_chart)

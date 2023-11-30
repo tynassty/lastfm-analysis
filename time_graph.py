@@ -1,3 +1,4 @@
+import datetime
 import datetime as dt
 from typing import List
 from matplotlib import pyplot as plt
@@ -6,6 +7,9 @@ import lastfm_reader
 from Scrobble import Scrobble
 from lastfm_reader import read_scrobbles
 
+FIG_WIDTH = 10
+FIG_HEIGHT = 5
+
 
 class ScrobblesError(Exception):
     pass
@@ -13,7 +17,7 @@ class ScrobblesError(Exception):
 
 def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobble], artists: List[str],
                    bin_width: dt.timedelta, mvg_avg_period: dt.timedelta = dt.timedelta(days=365),
-                   graph_type="simple", plot_func=plt.plot, relative=False):
+                   graph_type="simple", plot_func=plt.plot, relative=None):
     bins = create_bins(start, end, bin_width)
     array = [{artist: 0 for artist in artists} for _ in range(len(bins))]
     bin_index = 0
@@ -28,7 +32,7 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
         except IndexError:
             pass
 
-    if not relative:
+    if relative is None:
         x_axis = bins
     else:
         x_axis = []
@@ -36,33 +40,33 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
         for i in bins:
             x_axis.append(counter)
             counter += 1
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(FIG_WIDTH, FIG_HEIGHT))
     for artist in artists:
         y_axis = [array[i][artist] for i in range(len(bins))]
         if graph_type == "cumulative":
             y_axis = accumulate_array(y_axis)
         y_axis = moving_sum(y_axis, int(mvg_avg_period/bin_width))
-        if relative:
+        if relative is not None:
             y_axis2 = []
             found_non_zero = False
             for num in y_axis:
-                if num > 0:
+                if num >= relative:
                     found_non_zero = True
                 if found_non_zero:
                     y_axis2.append(num)
             y_axis = y_axis2
         plot_func(x_axis[:len(y_axis)], y_axis, label=artist)
-    if relative:
+    if relative is not None:
         plt.title('Cumulative sum of scrobbles relative to first listen')
     else:
-        plt.title('Moving sum of scrobbles of top artists over time')
+        plt.title('Moving sum ({} days) of scrobbles of top artists over time'.format(mvg_avg_period.days))
     plt.legend()
     plt.show()
 
 
 def graph_from_scrobbles(scrobbles: List[Scrobble], k=10, bin_width=dt.timedelta(days=1), graph_type="simple",
                          plot_func=plt.step, mvg_avg_period: dt.timedelta = dt.timedelta(days=365), addtl_artists=None,
-                         relative=False):
+                         relative=None):
     if len(scrobbles) <= 0:
         raise ScrobblesError("No scrobbles passed to graph_from_scrobbles")
     if addtl_artists is None:
