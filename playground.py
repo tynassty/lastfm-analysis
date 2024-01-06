@@ -8,10 +8,10 @@ scrobbles = sorted(scrobbles)
 
 filtered_scrobbles = [scr for scr in scrobbles]
 
-addl = []
+addl = ["mazzy star", "fiona apple", "the cranberries", "no doubt", "pavement"]
 
 try:
-    time_graph.graph_from_scrobbles(filtered_scrobbles, k=10, plot_func=plt.step,
-                                    mvg_avg_period=dt.timedelta(days=36500), relative=None, addtl_artists=addl)
+    time_graph.graph_from_scrobbles(filtered_scrobbles, k=0, plot_func=plt.step,
+                                    mvg_avg_period=dt.timedelta(days=365), relative=None, addtl_artists=addl)
 except time_graph.ScrobblesError as e:
     print(f"Error: {e}")
