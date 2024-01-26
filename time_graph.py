@@ -57,7 +57,7 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
             y_axis = y_axis2
         plot_func(x_axis[:len(y_axis)], y_axis, label=artist)
     if relative is not None:
-        plt.title('Cumulative sum of scrobbles relative to first listen')
+        plt.title('Cumulative sum of scrobbles relative to ' + ordinal(relative) + ' scrobble')
     else:
         plt.title('Moving sum ({} days) of scrobbles of top artists over time'.format(mvg_avg_period.days))
     plt.legend()
@@ -104,6 +104,14 @@ def moving_sum(array: List[int], period: int = 3):
         start = max(0, i - period + 1)
         moving.append(sum(array[start:i + 1]))
     return moving
+
+
+def ordinal(n: int):
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    else:
+        suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
+    return str(n) + suffix
 
 
 if __name__ == '__main__':
