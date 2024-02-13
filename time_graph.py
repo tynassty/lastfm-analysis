@@ -37,7 +37,7 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
     else:
         x_axis = []
         counter = 0
-        for i in bins:
+        for _ in bins:
             x_axis.append(counter)
             counter += 1
     plt.figure(figsize=(FIG_WIDTH, FIG_HEIGHT))
@@ -58,9 +58,12 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
         plot_func(x_axis[:len(y_axis)], y_axis, label=artist)
     if relative is not None:
         plt.title('Cumulative sum of scrobbles relative to ' + ordinal(relative) + ' scrobble')
+    elif mvg_avg_period.days < len(bins):
+        plt.title('Moving sum ({} days) of scrobbles of select artists over time'.format(mvg_avg_period.days))
     else:
-        plt.title('Moving sum ({} days) of scrobbles of top artists over time'.format(mvg_avg_period.days))
+        plt.title('Cumulative sum of scrobbles of select artists over time')
     plt.legend()
+    plt.grid(True)
     plt.show()
 
 

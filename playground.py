@@ -8,7 +8,7 @@ scrobbles = sorted(scrobbles)
 
 filtered_scrobbles = [scr for scr in scrobbles]
 
-addl = ["telenova"]
+addl = []
 
 try:
     time_graph.graph_from_scrobbles(filtered_scrobbles, k=10, plot_func=plt.step,
