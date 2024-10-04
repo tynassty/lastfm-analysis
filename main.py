@@ -44,7 +44,10 @@ if __name__ == "__main__":
     scrobbles = sorted(scrobbles)
 
     scrobbles = [scr for scr in scrobbles if scr.datetime.year == 2024]
-    scrobbles = [scr for scr in scrobbles if scr.datetime.month == 1]
+    # scrobbles = [scr for scr in scrobbles if scr.datetime.month == 9]
+    # scrobbles = [scr for scr in scrobbles if scr.datetime.weekday() == 6]
+    # scrobbles = [scr for scr in scrobbles if scr.datetime.hour == 23]
 
-    top_chart = top_chart_maker(scrobbles, 20, attribute="artist", fancy=False)
+    top_chart = top_chart_maker(scrobbles, 20, attribute="track", fancy=False)
     print(top_chart)
+

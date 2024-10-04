@@ -5,7 +5,8 @@ from Scrobble import Scrobble
 COMMA_ARTISTS = ["tyler, the creator", "now, now", "love, ecstasy and terror", "thank you, i'm sorry", "merci, mercy",
                  "slaughter beach, dog", "sincerely, me", "chunk! no, captain chunk!", "10,000 maniacs",
                  "earth, wind & fire", "crosby, stills, nash & young", "fuck yeah, dinosaurs!",
-                 "black country, new road", "whatever, dad"]
+                 "black country, new road", "whatever, dad", "the army, the navy", "hey, nothing",
+                 "two blinks, i love you", "lucie,too"]
 
 
 def clean_text(text):

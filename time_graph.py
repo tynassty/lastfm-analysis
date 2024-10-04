@@ -58,12 +58,13 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
         plot_func(x_axis[:len(y_axis)], y_axis, label=artist)
     if relative is not None:
         plt.title('Cumulative sum of scrobbles relative to ' + ordinal(relative) + ' scrobble')
+        plt.xlabel('Days since ' + ordinal(relative) + ' scrobble')
     elif mvg_avg_period.days < len(bins):
         plt.title('Moving sum ({} days) of scrobbles of select artists over time'.format(mvg_avg_period.days))
     else:
         plt.title('Cumulative sum of scrobbles of select artists over time')
     plt.legend()
-    plt.grid(True)
+    plt.grid(True, linewidth=0.2)
     plt.show()
 
 
@@ -123,8 +124,11 @@ if __name__ == '__main__':
 
     scrobbles = read_scrobbles('scrobbles-tynassty.csv')
     days = (max(scrobbles).datetime - min(scrobbles).datetime).days
-    graph_from_scrobbles(scrobbles, graph_type="simple", bin_width=dt.timedelta(days=1), plot_func=plt.plot,
-                         mvg_avg_period=dt.timedelta(days=90), k=10, addtl_artists=[])
+    artists = []
+    artists.extend(["men i trust", "alvvays", "ada lea", "allie x", "so young",
+                    "alanis morissette", "the courtneys", "haley blais", "purity ring", "bulow"])
+    graph_from_scrobbles(scrobbles, graph_type="simple", bin_width=dt.timedelta(days=1), plot_func=plt.step,
+                         mvg_avg_period=dt.timedelta(days=365), k=0, addtl_artists=artists)
 
     # scrobbles = sorted(scrobbles)
     # s = dt.datetime.fromtimestamp(1503869636)
