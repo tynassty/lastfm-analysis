@@ -25,12 +25,8 @@ def generate_graph(start: dt.datetime, end: dt.datetime, scrobbles: List[Scrobbl
     for scrobble in scrobbles:
         while scrobble.datetime > bins[bin_index]:
             bin_index += 1
-        try:
+        if scrobble.artist in array[bin_index]:
             array[bin_index][scrobble.artist] += 1
-        except KeyError:
-            pass
-        except IndexError:
-            pass
 
     if relative is None:
         x_axis = bins
@@ -125,10 +121,9 @@ if __name__ == '__main__':
     scrobbles = read_scrobbles('scrobbles-tynassty.csv')
     days = (max(scrobbles).datetime - min(scrobbles).datetime).days
     artists = []
-    artists.extend(["men i trust", "alvvays", "ada lea", "allie x", "so young",
-                    "alanis morissette", "the courtneys", "haley blais", "purity ring", "bulow"])
+    # artists.extend(["margaux", "lily seabird"])
     graph_from_scrobbles(scrobbles, graph_type="simple", bin_width=dt.timedelta(days=1), plot_func=plt.step,
-                         mvg_avg_period=dt.timedelta(days=365), k=0, addtl_artists=artists)
+                         mvg_avg_period=dt.timedelta(days=365), k=10, addtl_artists=artists)
 
     # scrobbles = sorted(scrobbles)
     # s = dt.datetime.fromtimestamp(1503869636)

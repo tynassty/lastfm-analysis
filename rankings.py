@@ -47,10 +47,7 @@ artists_to_graph = set()
 #     if any(n <= 5 for n in rank_dict[artist][365:]):
 #         artists_to_graph.add(artist)
 
-artists_to_graph.add("jacklen ro")
-# artists_to_graph.add("vona vella")
-# artists_to_graph.add("broods")
-# artists_to_graph.add("heatloaf")
+artists_to_graph.add("charly bliss")
 
 print(artists_to_graph)
 

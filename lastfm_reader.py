@@ -10,7 +10,7 @@ COMMA_ARTISTS = ["tyler, the creator", "now, now", "love, ecstasy and terror", "
 
 
 def clean_text(text):
-    return unidecode(text.lower())
+    return unidecode(text.strip().lower())
 
 
 def read_scrobbles(scrobbles_file):
