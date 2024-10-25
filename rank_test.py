@@ -57,5 +57,5 @@ bins, rank_dict, artists = preprocess_scrobbles('scrobbles-tynassty.csv')
 #         print(rank_dict[artist][-1], artist)
 
 for artist in artists:
-    if min(rank_dict[artist]) <= 2:
+    if min(rank_dict[artist]) == 10:
         print(artist)

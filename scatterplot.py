@@ -11,15 +11,11 @@ scrobbles = read_scrobbles('scrobbles-tynassty.csv')
 scrobbles = sorted(scrobbles)
 
 # filter scrobbles
-# scrobbles = [scr for scr in scrobbles]
-
-x = []
-y = []
+# scrobbles = [scr for scr in scrobbles if scr.datetime.month >= 7]
 
 # add data for each scrobble to axes
-for scr in scrobbles:
-    x.append(scr.datetime.date())
-    y.append(datetime.combine(datetime.today(), scr.datetime.time()))
+x = [scr.datetime.date() for scr in scrobbles]
+y = [datetime.combine(datetime.today(), scr.datetime.time()) for scr in scrobbles]
 
 plt.figure(figsize=(FIG_WIDTH, FIG_HEIGHT))
 plt.scatter(x, y, alpha=.1, s=1)

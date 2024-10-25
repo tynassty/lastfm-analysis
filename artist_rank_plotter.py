@@ -1,3 +1,5 @@
+import csv
+
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 import re
@@ -8,9 +10,8 @@ from lastfm_reader import read_scrobbles
 
 
 # Function to preprocess data and store results
-def preprocess_scrobbles(file_path):
-    # Read and sort scrobbles
-    scrobbles = read_scrobbles(file_path)
+def preprocess_scrobbles(scrobbles):
+    # sort scrobbles
     scrobbles = sorted(scrobbles)
 
     # Determine the time range and create time bins
@@ -46,7 +47,8 @@ def preprocess_scrobbles(file_path):
 
 
 # Pre-process scrobbles once and store the result
-bins, rank_dict, artists = preprocess_scrobbles('scrobbles-tynassty.csv')
+scrobbles = read_scrobbles('scrobbles-tynassty.csv')
+bins, rank_dict, artists = preprocess_scrobbles(scrobbles)
 
 
 # Function to plot multiple artists' ranks
@@ -70,6 +72,11 @@ def plot_multiple_artists(artists, bins, rank_dict):
         print("No valid artists to plot.")
 
 
+def parse_csv_with_commas(input_string):
+    # Use csv.reader to correctly handle commas within quotes
+    csv_reader = csv.reader([input_string], quotechar='"', delimiter=',', skipinitialspace=True)
+    return next(csv_reader)  # Return the first row as a list
+
 # Example usage with multiple artists:
 current_artist_list = []
 
@@ -85,7 +92,8 @@ while True:
         current_artist_list = []
 
     # Split input into a list of artists
-    current_artist_list.extend([lastfm_reader.clean_text(artist) for artist in artist_input.split(',')])
+    # current_artist_list.extend([lastfm_reader.clean_text(artist) for artist in artist_input.split(',')])
+    current_artist_list.extend(parse_csv_with_commas(artist_input))
 
     # Plot the selected artists
     plot_multiple_artists(current_artist_list, bins, rank_dict)
