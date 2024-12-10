@@ -11,37 +11,60 @@ from lastfm_reader import read_scrobbles
 
 # Function to preprocess data and store results
 def preprocess_scrobbles(scrobbles):
-    # sort scrobbles
+    """
+    Preprocesses scrobble data for analysis by binning scrobbles by time,
+    calculating cumulative scrobbles, and ranking artists based on their cumulative
+    scrobbles in each time bin.
+
+    :param scrobbles: List of scrobble objects. Each scrobble should have:
+                      - `datetime`: A timestamp of when the scrobble occurred.
+                      - `artist`: The name of the artist associated with the scrobble.
+    :return: A tuple containing:
+             - bins: List of time bin boundaries.
+             - rank_dict: Dictionary mapping each artist to a list of ranks
+                          (one per bin) based on their cumulative scrobbles.
+             - artists: Set of unique artist names from the scrobbles.
+    """
+    # Sort scrobbles by datetime
     scrobbles = sorted(scrobbles)
 
     # Determine the time range and create time bins
-    start = scrobbles[0].datetime
-    end = scrobbles[-1].datetime
-    bins = create_bins(start, end)
+    earliest_scr = scrobbles[0].datetime  # Earliest scrobble
+    latest_scr = scrobbles[-1].datetime  # Latest scrobble
+    bins = create_bins(earliest_scr, latest_scr)  # Function to create time bins based on earliest_scr and latest_scr
 
     # Initialize tracking data structures
-    artists = {scrobble.artist for scrobble in scrobbles}
-    scr_dict = {artist: [0] * len(bins) for artist in artists}
-    rank_dict = {artist: [0] * len(bins) for artist in artists}
-    cumul_dict = {}
+    artists = {scrobble.artist for scrobble in scrobbles}  # Unique set of artists
+    scr_dict = {artist: [0] * len(bins) for artist in artists}  # Unique set of artists
+    rank_dict = {artist: [0] * len(bins) for artist in artists}  # Artist ranks per bin
+    cumul_dict = {}  # Cumulative scrobbles for each artist
 
     # Bin scrobbles by time and artist
     bin_index = 0
     for scrobble in scrobbles:
+        # Move to the correct bin for the current scrobble
         while scrobble.datetime > bins[bin_index]:
             bin_index += 1
-        scr_dict[scrobble.artist][bin_index] += 1
+        scr_dict[scrobble.artist][bin_index] += 1  # Increment scrobble count in the bin
 
     # Calculate cumulative scrobbles
     for artist in scr_dict.keys():
-        cumul_dict[artist] = accumulate_array(scr_dict[artist])
+        cumul_dict[artist] = accumulate_array(scr_dict[artist])  # Helper to compute cumulative sums
 
     # Rank artists by cumulative scrobbles in each bin
     for i in range(len(bins)):
+        # Collect cumulative scrobbles for this bin
         scrs = [(a, cumul_dict[a][i]) for a in artists]
+        # Sort artists by cumulative scrobbles in descending order
         sorted_scrs = sorted(scrs, key=lambda x: -x[1])
+        # Assign ranks based on sorted order
         for j in range(len(artists)):
-            rank_dict[sorted_scrs[j][0]][i] = j + 1
+            if sorted_scrs[j][1] == 0:
+                # handles ties at 0 scrobbles
+                # SHOULD FIX so that it handles ties at all values!!
+                rank_dict[sorted_scrs[j][0]][i] = len(artists)
+            else:
+                rank_dict[sorted_scrs[j][0]][i] = j + 1
 
     return bins, rank_dict, artists
 
