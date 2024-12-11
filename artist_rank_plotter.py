@@ -58,13 +58,15 @@ def preprocess_scrobbles(scrobbles):
         # Sort artists by cumulative scrobbles in descending order
         sorted_scrs = sorted(scrs, key=lambda x: -x[1])
         # Assign ranks based on sorted order
-        for j in range(len(artists)):
-            if sorted_scrs[j][1] == 0:
-                # handles ties at 0 scrobbles
-                # SHOULD FIX so that it handles ties at all values!!
-                rank_dict[sorted_scrs[j][0]][i] = len(artists)
+        rank = 1
+        for j in range(len(sorted_scrs)):
+            if j > 0 and sorted_scrs[j][1] == sorted_scrs[j - 1][1]:
+                # If tied with the previous artist, assign the same rank
+                rank_dict[sorted_scrs[j][0]][i] = rank
             else:
-                rank_dict[sorted_scrs[j][0]][i] = j + 1
+                # Update rank for non-tied scrobbles
+                rank = j + 1
+                rank_dict[sorted_scrs[j][0]][i] = rank
 
     return bins, rank_dict, artists
 
@@ -80,15 +82,29 @@ def plot_multiple_artists(artists, bins, rank_dict):
     for artist in artists:
         if artist in rank_dict:
             plt.plot(bins, rank_dict[artist], label=artist)
-            # plt.step(bins, rank_dict[artist], label=artist)
             valid_artists.append(artist)
         else:
             print(f"Artist '{artist}' not found in the data.")
 
     if valid_artists:
-        plt.gca().invert_yaxis()  # Keep the ranking order (1 at the top)
-        plt.yscale('log')  # Set y-axis to logarithmic scale
-        plt.grid(True, which='major')  # Grid for major and minor ticks
+        # Find the worst ranking per bin (highest rank)
+        worst_ranks_per_bin = [max(rank_dict[artist][i] for artist in rank_dict) for i in range(len(bins))]
+
+        # Find the worst ranking across all bins
+        worst_ranking_overall = max(worst_ranks_per_bin)
+
+        worst_ranks_per_bin[-1] = worst_ranking_overall
+
+        # Plot the filled area between the top and bottom borders
+        plt.fill_between(bins, worst_ranks_per_bin, worst_ranking_overall, color='black', alpha=1)
+
+        # Set plot properties
+        plt.gca().invert_yaxis()  # Ensure the ranking goes upwards (1 at the top)
+        plt.yscale('log')  # You can keep the y-axis logarithmic if you want
+        plt.grid(True, which='major')
+        plt.title("Artist Ranks Over Time with Worst Rank Shape")
+        plt.xlabel("Time")
+        plt.ylabel("Rank (Lower is Better)")
         plt.legend()
         plt.show()
     else:

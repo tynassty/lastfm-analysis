@@ -121,9 +121,9 @@ if __name__ == '__main__':
     scrobbles = read_scrobbles('scrobbles-tynassty.csv')
     days = (max(scrobbles).datetime - min(scrobbles).datetime).days
     artists = []
-    # artists.extend(["margaux", "lily seabird"])
+    artists.extend(["jacklen ro"])
     graph_from_scrobbles(scrobbles, graph_type="simple", bin_width=dt.timedelta(days=1), plot_func=plt.step,
-                         mvg_avg_period=dt.timedelta(days=365), k=10, addtl_artists=artists)
+                         mvg_avg_period=dt.timedelta(days=365), k=9, addtl_artists=artists)
 
     # scrobbles = sorted(scrobbles)
     # s = dt.datetime.fromtimestamp(1503869636)
