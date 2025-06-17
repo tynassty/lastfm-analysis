@@ -1,4 +1,7 @@
 import csv
+import datetime
+from collections import Counter
+import heapq
 
 import matplotlib.pyplot as plt
 from matplotlib import ticker
@@ -30,7 +33,9 @@ def preprocess_scrobbles(scrobbles):
 
     # Determine the time range and create time bins
     earliest_scr = scrobbles[0].datetime  # Earliest scrobble
+    earliest_scr = datetime.datetime(earliest_scr.year, earliest_scr.month, earliest_scr.day)
     latest_scr = scrobbles[-1].datetime  # Latest scrobble
+    latest_scr = latest_scr + datetime.timedelta(days=1)
     bins = create_bins(earliest_scr, latest_scr)  # Function to create time bins based on earliest_scr and latest_scr
 
     # Initialize tracking data structures
@@ -51,6 +56,28 @@ def preprocess_scrobbles(scrobbles):
     for artist in scr_dict.keys():
         cumul_dict[artist] = accumulate_array(scr_dict[artist])  # Helper to compute cumulative sums
 
+    # Initialize a dictionary to store rank counts for each bin
+    rank_counts = [Counter() for _ in range(len(bins))]
+
+    # # Rank artists by cumulative scrobbles in each bin
+    # for i in range(len(bins)):
+    #     # Collect cumulative scrobbles for this bin
+    #     scrs = [(a, cumul_dict[a][i]) for a in artists]
+    #     # Sort artists by cumulative scrobbles in descending order
+    #     sorted_scrs = sorted(scrs, key=lambda x: -x[1])
+    #     # Assign ranks based on sorted order
+    #     rank = 1
+    #     for j in range(len(sorted_scrs)):
+    #         if j > 0 and sorted_scrs[j][1] == sorted_scrs[j - 1][1]:
+    #             # If tied with the previous artist, assign the same rank
+    #             rank_dict[sorted_scrs[j][0]][i] = rank
+    #         else:
+    #             # Update rank for non-tied scrobbles
+    #             rank = j + 1
+    #             rank_dict[sorted_scrs[j][0]][i] = rank
+    #         # Increment the rank count for this bin
+    #         rank_counts[i][rank] += 1
+
     # Rank artists by cumulative scrobbles in each bin
     for i in range(len(bins)):
         # Collect cumulative scrobbles for this bin
@@ -67,11 +94,17 @@ def preprocess_scrobbles(scrobbles):
                 # Update rank for non-tied scrobbles
                 rank = j + 1
                 rank_dict[sorted_scrs[j][0]][i] = rank
+            # Increment the rank count for this bin
+            rank_counts[i][rank] += 1
+
+    # for q in range(len(rank_counts)):
+    #     print(rank_counts[q])
 
     return bins, rank_dict, artists
 
 
 # Pre-process scrobbles once and store the result
+# scrobbles = read_scrobbles('scrobbles-test.csv')
 scrobbles = read_scrobbles('scrobbles-tynassty.csv')
 bins, rank_dict, artists = preprocess_scrobbles(scrobbles)
 
@@ -81,30 +114,32 @@ def plot_multiple_artists(artists, bins, rank_dict):
     valid_artists = []
     for artist in artists:
         if artist in rank_dict:
-            plt.plot(bins, rank_dict[artist], label=artist)
+            plt.step(bins, rank_dict[artist], label=artist)
             valid_artists.append(artist)
         else:
             print(f"Artist '{artist}' not found in the data.")
 
     if valid_artists:
         # Find the worst ranking per bin (highest rank)
-        worst_ranks_per_bin = [max(rank_dict[artist][i] for artist in rank_dict) for i in range(len(bins))]
-
-        # Find the worst ranking across all bins
-        worst_ranking_overall = max(worst_ranks_per_bin)
-
-        worst_ranks_per_bin[-1] = worst_ranking_overall
+        worst_ranks_per_bin = []
+        worst_rank_so_far = 0
+        for bin_index in range(len(bins)):
+            worst_rank_this_bin = 1
+            for artist, ranks in rank_dict.items():
+                worst_rank_this_bin = max(worst_rank_this_bin, ranks[bin_index])
+            worst_rank_so_far = max(worst_rank_so_far, worst_rank_this_bin)
+            worst_ranks_per_bin.append(worst_rank_so_far)
 
         # Plot the filled area between the top and bottom borders
-        plt.fill_between(bins, worst_ranks_per_bin, worst_ranking_overall, color='black', alpha=1)
+        plt.fill_between(bins, worst_ranks_per_bin, worst_rank_so_far, color='black', alpha=1, step="pre")
 
         # Set plot properties
         plt.gca().invert_yaxis()  # Ensure the ranking goes upwards (1 at the top)
         plt.yscale('log')  # You can keep the y-axis logarithmic if you want
         plt.grid(True, which='major')
-        plt.title("Artist Ranks Over Time with Worst Rank Shape")
+        plt.title("Artist Ranks Over Time")
         plt.xlabel("Time")
-        plt.ylabel("Rank (Lower is Better)")
+        plt.ylabel("Rank")
         plt.legend()
         plt.show()
     else:
@@ -115,6 +150,7 @@ def parse_csv_with_commas(input_string):
     # Use csv.reader to correctly handle commas within quotes
     csv_reader = csv.reader([input_string], quotechar='"', delimiter=',', skipinitialspace=True)
     return next(csv_reader)  # Return the first row as a list
+
 
 # Example usage with multiple artists:
 current_artist_list = []
