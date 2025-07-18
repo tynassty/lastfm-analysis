@@ -181,9 +181,9 @@ if __name__ == '__main__':
     days = (max(scrobbles).datetime - min(scrobbles).datetime).days
     artists = []
     # artists.extend(["jacklen ro"])
-    # artists.extend(["cyberbully mom club"])
+    # artists.extend(["work wife"])
     graph_from_scrobbles(scrobbles, graph_type="simple", bin_width=dt.timedelta(days=1), plot_func=plt.step,
-                         mvg_avg_period=dt.timedelta(days=365000), k=10, addtl_artists=artists, relative=None)
+                         mvg_avg_period=dt.timedelta(days=365), k=10, addtl_artists=artists, relative=None)
 
     scrobbles = sorted(scrobbles)
     # s = dt.datetime.fromtimestamp(1503869636)
