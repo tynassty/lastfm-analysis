@@ -1,3 +1,4 @@
+import csv
 from Scrobble import Scrobble
 from lastfm_reader import read_scrobbles
 from collections import Counter
@@ -6,15 +7,14 @@ import networkx as nx
 
 
 def compute_transitions(artists):
-    transitions = {}
+    transitions = Counter()
     prior = 'START'
 
     for artist in artists:
-        tup = (prior, artist)
-        transitions[tup] = transitions.get(tup, 0) + 1
+        transitions[(prior, artist)] += 1
         prior = artist
 
-    return Counter(transitions)
+    return transitions
 
 
 def print_top_transitions(transition_counter, top_n=10):
@@ -30,24 +30,61 @@ def get_following_artist_counts(artists, target_artist):
     return Counter(following)
 
 
-def draw_transition_graph(counter, top_n=20):
+def draw_transition_graph(counter, min_connections=20):
     G = nx.DiGraph()
-    for (a, b), count in counter.most_common(top_n):
-        G.add_edge(a, b, weight=count)
+    for (a, b), count in counter.most_common(len(counter)):
+        if count >= min_connections and a != b:
+            G.add_edge(a, b, weight=count)
 
-    pos = nx.spring_layout(G, k=0.8)
+    pos = nx.spring_layout(G, k=2, seed=1)
+    # pos = nx.kamada_kawai_layout(G)
+    # pos = nx.planar_layout(G)
     edge_labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+    nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', font_size=8, arrowsize=10)
+    # nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=7)
     plt.title("Top Artist Transitions")
     plt.show()
 
 
+def export_transitions_to_csv(counter, min_connections=20, filename="transitions.csv", ignore_self_links=True,
+                              undirected=False):
+    written = set()
+
+    with open(filename, mode='w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+        # Write header row
+        writer.writerow(["Source", "Target", "Weight"])
+
+        # Write each edge if it meets the min_connections threshold
+        for (a, b), count in counter.most_common():
+            if not ignore_self_links and count < min_connections:
+                continue
+            if ignore_self_links and a == b:
+                continue
+
+            if undirected:
+                key = frozenset([a, b])
+                if key in written:
+                    continue  # already wrote this unordered pair
+                reverse_count = counter.get((b, a), 0)
+                total = count + reverse_count if a != b else count
+                if total < min_connections:
+                    continue
+                writer.writerow(sorted([a, b]) + [total])
+                written.add(key)
+            else:
+                if count >= min_connections:
+                    writer.writerow([a, b, count])
+
+    print(f"\nTransitions saved to {filename}")
+
+
 def main():
-    n = 50
+    n = 10
     scrobbles = read_scrobbles("scrobbles-tynassty.csv")
     scrobbles = sorted(scrobbles)
-    artists = [scrobble.artist for scrobble in scrobbles]
+    # artists = [scrobble.artist for scrobble in scrobbles]
+    artists = [scrobble.track for scrobble in scrobbles]
 
     artist_counter = Counter(artists)
     top_artists = artist_counter.most_common(n)
@@ -58,7 +95,8 @@ def main():
 
     print("\nTop Transitions:")
     transition_counter = compute_transitions(artists)
-    print_top_transitions(transition_counter)
+    print_top_transitions(transition_counter, top_n=n)
+
 
     # target = "soccer mommy"
     # counts = get_following_artist_counts(artists, target)
@@ -70,12 +108,13 @@ def main():
     #     print(f"{artist}: {count}")
     # print(f"others: {artist_counter[target] - total_counts}")
 
-
     print("\nPercentage of plays followed by same artist:")
     for artist in top_artists:
         target = artist[0]
         print(f"{target}: {transition_counter[(target, target)]/artist_counter[target]*100:.2f}%")
         # print(target, transition_counter[(target, target)]/artist_counter[target])
+
+    export_transitions_to_csv(transition_counter, min_connections=4, undirected=False)
 
 
 if __name__ == "__main__":
