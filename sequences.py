@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
+def ngrams(values, n=2):
+    return [tuple(values[i:i+n]) for i in range(len(values) - n + 1)]
+
+
 def compute_transitions(artists):
     transitions = Counter()
     prior = 'START'
@@ -47,7 +51,7 @@ def draw_transition_graph(counter, min_connections=20):
 
 
 def export_transitions_to_csv(counter, min_connections=20, filename="transitions.csv", ignore_self_links=True,
-                              undirected=False):
+                              directed=True):
     written = set()
 
     with open(filename, mode='w', newline='', encoding='utf-8') as f:
@@ -62,7 +66,7 @@ def export_transitions_to_csv(counter, min_connections=20, filename="transitions
             if ignore_self_links and a == b:
                 continue
 
-            if undirected:
+            if not directed:
                 key = frozenset([a, b])
                 if key in written:
                     continue  # already wrote this unordered pair
@@ -83,8 +87,11 @@ def main():
     n = 10
     scrobbles = read_scrobbles("scrobbles-tynassty.csv")
     scrobbles = sorted(scrobbles)
-    # artists = [scrobble.artist for scrobble in scrobbles]
-    artists = [scrobble.track for scrobble in scrobbles]
+    artists = [scrobble.artist for scrobble in scrobbles]
+    # artists = [scrobble.track for scrobble in scrobbles]
+    # artists = [scrobble.hour for scrobble in scrobbles]
+
+    # artists = ngrams(artists, 2)
 
     artist_counter = Counter(artists)
     top_artists = artist_counter.most_common(n)
@@ -98,7 +105,7 @@ def main():
     print_top_transitions(transition_counter, top_n=n)
 
 
-    # target = "soccer mommy"
+    # target = "coeur d'alene (work wife)"
     # counts = get_following_artist_counts(artists, target)
     #
     # print(f"\nArtists most frequently played after '{target}':")
@@ -114,7 +121,7 @@ def main():
         print(f"{target}: {transition_counter[(target, target)]/artist_counter[target]*100:.2f}%")
         # print(target, transition_counter[(target, target)]/artist_counter[target])
 
-    export_transitions_to_csv(transition_counter, min_connections=4, undirected=False)
+    export_transitions_to_csv(transition_counter, min_connections=15, directed=False, ignore_self_links=True)
 
 
 if __name__ == "__main__":
